@@ -11,4 +11,5 @@ add_executable(pyc__ main.cpp
         parser/Parser.cpp
         parser/Parser.h
         parser/ASTNode.cpp
-        parser/ASTNode.h)
+        parser/ASTNode.h
+        parser/Visibility.h)
