@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include "Visibility.h"
+#include "Common.h"
 #include "../lexer/Token.h"
 
 struct ASTNode {
@@ -59,7 +59,12 @@ struct Class : ASTNode {
     }
 };
 
-struct BinaryExpr : ASTNode {
+
+struct Expression : ASTNode {
+    ~Expression() override = default;
+};
+
+struct BinaryExpr : Expression {
     std::unique_ptr<ASTNode> left, right;
     Token op;
 
@@ -67,9 +72,6 @@ struct BinaryExpr : ASTNode {
         : left(std::move(left)), right(std::move(right)), op(std::move(op)) {
     }
 };
-
-struct Expression : ASTNode {};
-
 
 struct ConditionalStatement : ASTNode {
     std::unique_ptr<Expression> condition;
@@ -88,7 +90,8 @@ struct ForStatement : ASTNode {
     std::unique_ptr<ASTNode> body;
 
     ForStatement(std::string identifier, std::unique_ptr<Expression> iterable, std::unique_ptr<ASTNode> body)
-        : identifier(std::move(identifier)), iterable(std::move(iterable)), body(std::move(body)) {};
+        : identifier(std::move(identifier)), iterable(std::move(iterable)), body(std::move(body)) {
+    };
 };
 
 struct WhileStatement : ASTNode {
@@ -100,21 +103,79 @@ struct WhileStatement : ASTNode {
     };
 };
 
+struct Identifier : Expression {
+    std::string name;
 
-struct Literal : Expression {
-    std::string type;
-    std::variant<std::string, double> value;
-
-    Literal(std::string type, std::variant<std::string, double> value) : type(std::move(type)), value(std::move(value)) {};
+    Identifier(std::string name) : name(std::move(name)) {
+    };
 };
 
-struct FunctionCall : Expression {
-    std::string caller;
-    std::string functionName;
+struct UnaryExpression : Expression {
+    Token op;
+    std::unique_ptr<Expression> right;
+
+    UnaryExpression(Token op, std::unique_ptr<Expression> right) : op(std::move(op)), right(std::move(right)) {
+    };
+};
+
+struct Literal : Expression {
+    Token token;
+
+    Literal(Token token) : token(std::move(token)) {
+    };
+};
+
+struct FunctionCallExpression : Expression {
+    std::unique_ptr<Expression> callee;
     std::vector<std::unique_ptr<Expression>> args;
 
-    FunctionCall(std::string caller, std::string functionName, std::vector<std::unique_ptr<Expression>> args)
-        : caller(std::move(caller)), functionName(std::move(functionName)), args(std::move(args)) {};
+    FunctionCallExpression(std::unique_ptr<Expression> callee, std::vector<std::unique_ptr<Expression> > args)
+        : callee(std::move(callee)), args(std::move(args)) {
+    };
+};
+
+struct GetExpression : Expression {
+    std::unique_ptr<Expression> left;
+    std::string propertyName;
+
+    GetExpression(std::unique_ptr<Expression> left, std::string propertyName) : left(std::move(left)),
+        propertyName(std::move(propertyName)) {
+    };
+};
+
+struct VariableExpression : Expression {
+    std::string name;
+
+    VariableExpression(std::string name) : name(std::move(name)) {
+    };
+};
+
+struct CompoundAssignExpression : Expression {
+    std::string name;
+    Token op;
+    std::unique_ptr<Expression> value;
+
+    CompoundAssignExpression(std::string name, Token op, std::unique_ptr<Expression> value) : name(std::move(name)),
+        op(std::move(op)), value(std::move(value)) {
+    }
+};
+
+struct CompoundSetExpression : Expression {
+    std::unique_ptr<Expression> object;
+    std::string propertyName;
+    Token op;
+    std::unique_ptr<Expression> value;
+
+    CompoundSetExpression(std::unique_ptr<Expression> object, std::string propertyName, Token op, std::unique_ptr<Expression> value)
+        : object(std::move(object)), propertyName(std::move(propertyName)), op(std::move(op)), value(std::move(value)) {
+    }
+};
+
+struct AssignExpression : Expression {
+    std::unique_ptr<Expression> left;
+    std::unique_ptr<Expression> value;
+
+    AssignExpression(std::unique_ptr<Expression> left, std::unique_ptr<Expression> value) : left(std::move(left)), value(std::move(value)) {}
 };
 
 #endif //PYC___ASTNODE_H
