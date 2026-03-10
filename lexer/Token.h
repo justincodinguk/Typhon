@@ -7,18 +7,19 @@
 
 enum class TokenType {
     // Symbols
-    LParen, RParen, LBracket, RBracket, LBrace, RBrace, Comma, Dot, Semicolon, Colon, Arrow, Newline, EndOfFile,
+    LBracket, RBracket, LBrace, RBrace, Comma, Semicolon, Colon, Arrow, Newline, EndOfFile, Dot,
+    LParen, RParen,
     // Binary Operator
     Plus, Minus, Multiply, Divide, Modulo, Power, FloorDivide, Assign, Equal, NotEqual, LessThan,
     GreaterThan, PlusAssign, MinusAssign, MultiplyAssign, DivideAssign, ModuloAssign, PowerAssign,
     FloorDivideAssign, LessThanOrEqual, GreaterThanOrEqual, DoubleAmpersand, DoublePipe,
     // Unary Operator
-    Increment, Decrement, UnaryMinus, UnaryPlus,
+    Increment, Decrement, UnaryMinus, UnaryPlus, Bang,
     // Keywords
     If, Else, Elif, While, For, Def, Class, Return, Ext, Import, As, Try, Catch, Finally, With,
     Break, Continue, And, Or, Not, In, Is, True, False, Nonlocal, Del, Assert, Async, Await, Public, Internal, Private,
     // Constants
-    Identifier, Literal
+    Identifier, Literal, IntLiteral, StringLiteral, FloatLiteral
 
 };
 
