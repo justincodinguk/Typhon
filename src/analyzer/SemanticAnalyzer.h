@@ -4,7 +4,7 @@
 
 #ifndef TYPHON_SEMANTIC_ANALYZER_H
 #define TYPHON_SEMANTIC_ANALYZER_H
-#include "Symbol.h"
+#include "SymbolTable.h"
 #include "common/Visitor.h"
 
 class SemanticAnalyzer : public Visitor {

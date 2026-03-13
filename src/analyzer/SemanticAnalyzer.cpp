@@ -4,8 +4,8 @@
 
 #include "SemanticAnalyzer.h"
 
-#include "../errors/errors.h"
-#include "../parser/ASTNode.h"
+#include "errors/errors.h"
+#include "parser/ASTNode.h"
 
 SemanticAnalyzer::SemanticAnalyzer() = default;
 
@@ -50,7 +50,8 @@ void SemanticAnalyzer::visit(WhileStatement *expr) {
     }
 }
 
-void SemanticAnalyzer::visit(Identifier *expr) {}
+void SemanticAnalyzer::visit(Identifier *expr) {
+}
 
 void SemanticAnalyzer::visit(UnaryExpression *expr) {
     expr->right->accept(this);
@@ -78,10 +79,22 @@ void SemanticAnalyzer::visit(Literal *expr) {
 
 void SemanticAnalyzer::visit(FunctionCallExpression *expr) {
     expr->callee->accept(this);
-    for (const auto& arg : expr->args) arg->accept(this);
-    // TODO: Check from symbol table
+    const auto &args = expr->args;
+    for (int i = 0; i < expr->args.size(); ++i) {
+        expr->args[i]->accept(this);
+        if (auto &argType = *expr->evaluatedType.wrappedTypes[i + 1].get(); argType != args[i]->evaluatedType) {
+            throw std::runtime_error("TypeError");
+        }
+    }
 }
 
 void SemanticAnalyzer::visit(GetExpression *expr) {
+    expr->left->accept(this);
+    const auto &leftType = expr->left->evaluatedType;
+    if (const auto classMember = symbolTable.resolveClassMember(leftType.className, expr->propertyName);
+        classMember == nullptr) throw std::runtime_error("Illegal Access");
+}
+
+void SemanticAnalyzer::visit(Class *expr) {
 
 }
