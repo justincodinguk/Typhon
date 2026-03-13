@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "ASTNode.h"
-#include "Common.h"
+#include "../common/Common.h"
 
 class Parser {
     int index = 0;

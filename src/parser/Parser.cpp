@@ -56,7 +56,7 @@ std::unique_ptr<ASTNode> Parser::classDeclaration(Visibility visibility) {
     auto parameters = parameterList();
     consume(TokenType::LBrace, "Expected '{'");
     auto body = block();
-    return std::make_unique<Class>(name.toString(), parameters, std::move(body), visibility);
+    return std::make_unique<Class>(name.toString(), std::move(parameters), std::move(body), visibility);
 }
 
 std::unique_ptr<ASTNode> Parser::functionDeclaration(Visibility visibility) {
@@ -138,7 +138,7 @@ std::unique_ptr<ASTNode> Parser::forStatement() {
     auto iterable = expression();
     consume(TokenType::LBrace, "Expected '{'");
     auto body = block();
-    return std::make_unique<ForStatement>(identifier.toString(), std::move(iterable), std::move(body));
+    return std::make_unique<ForStatement>(std::make_unique<Identifier>(identifier.toString()), std::move(iterable), std::move(body));
 }
 
 std::unique_ptr<ASTNode> Parser::block() {

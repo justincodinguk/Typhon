@@ -8,8 +8,8 @@
 #include <stack>
 #include <unordered_map>
 
-#include "Type.h"
-#include "../parser/Common.h"
+#include "types/Type.h"
+#include "common/Common.h"
 
 struct Symbol {
     std::string name;

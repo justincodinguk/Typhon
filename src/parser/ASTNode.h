@@ -8,10 +8,11 @@
 #include <utility>
 #include <vector>
 
-#include "Common.h"
-#include "../analyzer/Type.h"
-#include "../lexer/Token.h"
-#include "../analyzer/Visitor.h"
+#include "../common/Common.h"
+
+#include "types/Type.h"
+#include "lexer/Token.h"
+#include "common/Visitor.h"
 
 struct ASTNode {
     virtual ~ASTNode();
@@ -22,6 +23,10 @@ struct Parameter : ASTNode {
     std::string name, type;
 
     Parameter(std::string name, std::string type) : name(std::move(name)), type(std::move(type)) {
+    }
+
+    void accept(Visitor *visitor) override {
+        visitor->visit(this);
     }
 };
 
@@ -65,7 +70,7 @@ struct Class : ASTNode {
     std::unique_ptr<ASTNode> body;
     Visibility visibility;
 
-    Class(std::string name, std::vector<Parameter> params, std::unique_ptr<ASTNode> body, const Visibility visibility)
+    Class(std::string name, std::vector<Parameter> params, std::unique_ptr<ASTNode> body, Visibility visibility)
         : name(std::move(name)), params(std::move(params)), body(std::move(body)), visibility(visibility) {
     }
 

@@ -1,0 +1,5 @@
+def main(args: list<str>) {
+    print("Hello from typhon!")
+    a = 4
+    print(f"a is {a}")
+}
