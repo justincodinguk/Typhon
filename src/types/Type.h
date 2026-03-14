@@ -9,7 +9,7 @@
 #include <vector>
 
 enum class TypeKind {
-    INT, FLOAT, STRING, BOOL, NONE, CLASS, FUNCTION, ERROR, ANY
+    INT, FLOAT, STRING, BOOL, NONE, CLASS, FUNCTION, ERROR, ANY, UNINITIALIZED
 };
 
 struct Type {
@@ -26,6 +26,7 @@ struct Type {
     static Type Function(std::shared_ptr<Type> returnType, std::vector<std::shared_ptr<Type>> paramTypes);
     static Type Any();
     static Type Error();
+    static Type Uninitialized();
 
     bool operator==(const Type &other) const;
 };

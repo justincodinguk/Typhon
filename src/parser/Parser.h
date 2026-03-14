@@ -37,6 +37,8 @@ public:
     std::unique_ptr<ASTNode> forStatement();
     std::unique_ptr<Expression> expression();
     std::unique_ptr<ASTNode> block();
+    std::vector<std::string> genericDeclaration();
+    std::unique_ptr<TypeNode> typeDeclaration();
 
 private:
     std::unique_ptr<Expression> parseExpression(int precedence);

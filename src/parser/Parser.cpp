@@ -20,7 +20,7 @@ Token Parser::consume() {
 }
 
 Token Parser::consume(const TokenType type, const std::string &error) {
-    if (match(type)) return consume();
+    if (match(type)) return peek(-1);
     perror(
         (error + " at line " + std::to_string(tokens[index].line) + " column " + std::to_string(tokens[index].column) +
          "\n").c_str());
@@ -53,39 +53,43 @@ std::vector<std::unique_ptr<ASTNode> > Parser::parse() {
 std::unique_ptr<ASTNode> Parser::classDeclaration(Visibility visibility) {
     consume(TokenType::Class, "Expected class definition");
     Token name = consume(TokenType::Identifier, "Expected class name");
+    auto generics = genericDeclaration();
     auto parameters = parameterList();
     consume(TokenType::LBrace, "Expected '{'");
     auto body = block();
-    return std::make_unique<Class>(name.toString(), std::move(parameters), std::move(body), visibility);
+    return std::make_unique<Class>(name.toString(), std::move(parameters), std::move(generics), std::move(body),
+                                   visibility);
 }
 
 std::unique_ptr<ASTNode> Parser::functionDeclaration(Visibility visibility) {
     consume(TokenType::Def, "Expected function definition");
     Token name = consume(TokenType::Identifier, "Expected function name");
+    auto generics = genericDeclaration();
     auto parameters = parameterList();
     consume(TokenType::Arrow, "Expected return type");
-    Token returnType = consume(TokenType::Identifier, "Expected return type");
+    auto returnType = typeDeclaration();
     consume(TokenType::LBrace, "Expected '{'");
     auto body = block();
 
-    return std::make_unique<Function>(name.toString(), returnType.toString(), parameters, std::move(body), visibility);
+    return std::make_unique<Function>(name.toString(), std::move(returnType), std::move(generics),
+                                      std::move(parameters), std::move(body), visibility);
 }
 
 std::unique_ptr<ASTNode> Parser::extensionFunctionDeclaration(Visibility visibility) {
     consume(TokenType::Ext, "Expected extension function definition");
     consume(TokenType::Def, "Expected extension function definition");
-    auto extensionOn = consume(TokenType::Identifier, "Expected extension type");
+    auto extensionOn = typeDeclaration();
     consume(TokenType::Dot, "Expected '.'");
     Token name = consume(TokenType::Identifier, "Expected extension function name");
+    auto generics = genericDeclaration();
     auto parameters = parameterList();
     consume(TokenType::Arrow, "Expected return type");
-    Token returnType = consume(TokenType::Identifier, "Expected return type");
+    auto returnType = typeDeclaration();
     consume(TokenType::LBrace, "Expected '{'");
     auto body = block();
 
-    return std::make_unique<ExtensionFunction>(name.toString(), returnType.toString(), extensionOn.toString(),
-                                               parameters,
-                                               std::move(body), visibility);
+    return std::make_unique<ExtensionFunction>(name.toString(), std::move(returnType), std::move(extensionOn),
+                                               std::move(parameters), std::move(generics), std::move(body), visibility);
 }
 
 std::vector<Parameter> Parser::parameterList() {
@@ -101,8 +105,8 @@ std::vector<Parameter> Parser::parameterList() {
 Parameter Parser::parameter() {
     Token name = consume(TokenType::Identifier, "Expected parameter name");
     consume(TokenType::Colon, "Expected parameter declaration");
-    Token type = consume(TokenType::Identifier, "Expected parameter type");
-    return {name.toString(), type.toString()};
+    auto type = typeDeclaration();
+    return {name.toString(), std::move(type)};
 }
 
 std::unique_ptr<ASTNode> Parser::conditionalStatement() {
@@ -112,8 +116,7 @@ std::unique_ptr<ASTNode> Parser::conditionalStatement() {
     auto body = block();
     std::unique_ptr<ASTNode> elseNode;
     if (match(TokenType::Else)) {
-        consume(TokenType::Else, "Expected else");
-        if (match(TokenType::If)) {
+        if (peek().type == TokenType::If) {
             elseNode = conditionalStatement();
         } else {
             consume(TokenType::LBrace, "Expected body");
@@ -138,7 +141,8 @@ std::unique_ptr<ASTNode> Parser::forStatement() {
     auto iterable = expression();
     consume(TokenType::LBrace, "Expected '{'");
     auto body = block();
-    return std::make_unique<ForStatement>(std::make_unique<Identifier>(identifier.toString()), std::move(iterable), std::move(body));
+    return std::make_unique<ForStatement>(std::make_unique<Identifier>(identifier.toString()), std::move(iterable),
+                                          std::move(body));
 }
 
 std::unique_ptr<ASTNode> Parser::block() {
@@ -179,6 +183,22 @@ std::unique_ptr<ASTNode> Parser::block() {
     }
 }
 
+std::vector<std::string> Parser::genericDeclaration() {
+    std::vector<std::string> generics;
+    if (match(TokenType::LBracket)) {
+        do generics.push_back(consume(TokenType::Identifier, "Expected generic parameter").toString());
+        while (match(TokenType::Comma));
+        consume(TokenType::RBracket, "Expected ']'");
+    }
+    return generics;
+}
+
+std::unique_ptr<TypeNode> Parser::typeDeclaration() {
+    auto typeName = consume(TokenType::Identifier, "Expected type name");
+    auto generics = genericDeclaration();
+    return std::make_unique<TypeNode>(typeName.toString(), std::move(generics));
+}
+
 std::unique_ptr<Expression> Parser::expression() {
     return parseExpression(NONE);
 }
@@ -214,8 +234,10 @@ std::unique_ptr<Expression> Parser::parsePrefix() {
         case TokenType::UnaryPlus:
         case TokenType::Increment:
         case TokenType::Decrement:
-        case TokenType::Bang:
-            return std::make_unique<UnaryExpression>(next, std::move(parsePrefix()));
+        case TokenType::Bang: {
+            auto prefix = parsePrefix();
+            return std::make_unique<UnaryExpression>(next, std::move(prefix));
+        }
         default:
             throw std::runtime_error("Expected expression");
     }
@@ -251,11 +273,12 @@ std::unique_ptr<Expression> Parser::parseInfix(std::unique_ptr<Expression> left,
         case TokenType::ModuloAssign:
         case TokenType::PowerAssign: {
             auto value = parseExpression(ASSIGNMENT - 1);
-            if (auto* var = dynamic_cast<VariableExpression*>(left.get())) {
+            if (auto *var = dynamic_cast<VariableExpression *>(left.get())) {
                 return std::make_unique<CompoundAssignExpression>(var->name, op, std::move(value));
             }
-            if (auto* get = dynamic_cast<GetExpression*>(left.get())) {
-                return std::make_unique<CompoundSetExpression>(std::move(get->left), get->propertyName, op, std::move(value));
+            if (auto *get = dynamic_cast<GetExpression *>(left.get())) {
+                return std::make_unique<CompoundSetExpression>(std::move(get->left), get->propertyName, op,
+                                                               std::move(value));
             }
             throw std::runtime_error("Invalid assignment target");
         }
@@ -269,7 +292,7 @@ std::unique_ptr<Expression> Parser::parseInfix(std::unique_ptr<Expression> left,
 }
 
 std::unique_ptr<Expression> Parser::finishCall(std::unique_ptr<Expression> callee) {
-    std::vector<std::unique_ptr<Expression>> args;
+    std::vector<std::unique_ptr<Expression> > args;
     if (!match(TokenType::RParen)) {
         do args.push_back(parseExpression(NONE));
         while (match(TokenType::Comma));

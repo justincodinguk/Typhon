@@ -42,6 +42,10 @@ Type Type::Error() {
     return {TypeKind::ERROR};
 }
 
+Type Type::Uninitialized() {
+    return {TypeKind::UNINITIALIZED};
+}
+
 bool Type::operator==(const Type &other) const {
     if (kind != other.kind) return false;
     if (kind==TypeKind::CLASS || kind==TypeKind::FUNCTION) {
