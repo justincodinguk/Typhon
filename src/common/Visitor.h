@@ -22,6 +22,7 @@ struct Class;
 struct Function;
 struct TypeNode;
 struct ExtensionFunction;
+struct Body;
 struct Parameter;
 
 class Visitor {
@@ -46,6 +47,7 @@ public:
     virtual void visit(Function* expr) = 0;
     virtual void visit(ExtensionFunction* expr) = 0;
     virtual void visit(Parameter* expr) = 0;
+    virtual void visit(Body* expr) = 0;
 };
 
 #endif //TYPHON_VISITOR_H
