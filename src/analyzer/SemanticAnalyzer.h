@@ -21,8 +21,9 @@ public:
     void visit(UnaryExpression *expr) override;
     void visit(Literal *expr) override;
     void visit(FunctionCallExpression *expr) override;
+    void visit(Body *expr) override;
+    void visit(TypeNode *expr) override;
     void visit(GetExpression *expr) override;
-    void visit(VariableExpression *expr) override;
     void visit(CompoundAssignExpression *expr) override;
     void visit(CompoundSetExpression *expr) override;
     void visit(AssignExpression *expr) override;
@@ -32,7 +33,9 @@ public:
     void visit(Parameter *expr) override;
 
 private:
-    void defineParameters(SymbolTable& thisSymbolTable, std::vector<Parameter>& params);
+    std::vector<std::unique_ptr<Type>> defineParameters(SymbolTable& thisSymbolTable, std::vector<Parameter>& params);
+
+    static std::unique_ptr<Type> typeFromNode(const TypeNode* node);
 };
 
 
