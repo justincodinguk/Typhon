@@ -22,9 +22,9 @@ struct ASTNode {
 
 struct TypeNode : ASTNode {
     std::string typeClass;
-    std::vector<std::string> genericParams;
+    std::vector<std::unique_ptr<TypeNode>> genericParams;
 
-    TypeNode(std::string typeClass, std::vector<std::string> genericParams) : typeClass(std::move(typeClass)),
+    TypeNode(std::string typeClass, std::vector<std::unique_ptr<TypeNode>> genericParams) : typeClass(std::move(typeClass)),
                                                                               genericParams(std::move(genericParams)) {
     }
 
@@ -47,16 +47,25 @@ struct Parameter : ASTNode {
     }
 };
 
+struct Body : ASTNode {
+    std::vector<std::unique_ptr<ASTNode>> children;
+    Body(std::vector<std::unique_ptr<ASTNode>> children) : children(std::move(children)) {}
+
+    void accept(Visitor *visitor) override {
+        visitor->visit(this);
+    }
+};
+
 struct Function : ASTNode {
     std::string name;
     std::unique_ptr<TypeNode> returnType;
     std::vector<Parameter> params;
     std::vector<std::string> genericParams;
-    std::unique_ptr<ASTNode> body;
+    std::unique_ptr<Body> body;
     Visibility visibility;
 
     Function(std::string name, std::unique_ptr<TypeNode> returnType, std::vector<std::string> genericParams,
-             std::vector<Parameter> params, std::unique_ptr<ASTNode> body,
+             std::vector<Parameter> params, std::unique_ptr<Body> body,
              const Visibility visibility)
         : name(std::move(name)), returnType(std::move(returnType)), params(std::move(params)),
           genericParams(std::move(genericParams)), body(std::move(body)),
@@ -73,12 +82,12 @@ struct ExtensionFunction : ASTNode {
     std::unique_ptr<TypeNode> returnType, extensionOn;
     std::vector<Parameter> params;
     std::vector<std::string> genericParams;
-    std::unique_ptr<ASTNode> body;
+    std::unique_ptr<Body> body;
     Visibility visibility;
 
     ExtensionFunction(std::string name, std::unique_ptr<TypeNode> returnType, std::unique_ptr<TypeNode> extensionOn,
                       std::vector<Parameter> params, std::vector<std::string> genericParams,
-                      std::unique_ptr<ASTNode> body, const Visibility visibility)
+                      std::unique_ptr<Body> body, const Visibility visibility)
         : name(std::move(name)), returnType(std::move(returnType)), extensionOn(std::move(extensionOn)),
           params(std::move(params)), genericParams(std::move(genericParams)), body(std::move(body)),
           visibility(visibility) {
@@ -93,11 +102,11 @@ struct Class : ASTNode {
     std::string name;
     std::vector<Parameter> params;
     std::vector<std::string> genericParams;
-    std::unique_ptr<ASTNode> body;
+    std::unique_ptr<Body> body;
     Visibility visibility;
 
     Class(std::string name, std::vector<Parameter> params, std::vector<std::string> genericParams,
-          std::unique_ptr<ASTNode> body, const Visibility visibility)
+          std::unique_ptr<Body> body, const Visibility visibility)
         : name(std::move(name)), params(std::move(params)), genericParams(std::move(genericParams)),
           body(std::move(body)),
           visibility(visibility) {
@@ -145,9 +154,9 @@ struct ConditionalStatement : ASTNode {
 
 struct WhileStatement : ASTNode {
     std::unique_ptr<Expression> condition;
-    std::unique_ptr<ASTNode> body;
+    std::unique_ptr<Body> body;
 
-    WhileStatement(std::unique_ptr<Expression> condition, std::unique_ptr<ASTNode> body)
+    WhileStatement(std::unique_ptr<Expression> condition, std::unique_ptr<Body> body)
         : condition(std::move(condition)), body(std::move(body)) {
     };
 
@@ -171,10 +180,10 @@ struct Identifier : Expression {
 struct ForStatement : ASTNode {
     std::unique_ptr<Identifier> identifier;
     std::unique_ptr<Expression> iterable;
-    std::unique_ptr<ASTNode> body;
+    std::unique_ptr<Body> body;
 
     ForStatement(std::unique_ptr<Identifier> identifier, std::unique_ptr<Expression> iterable,
-                 std::unique_ptr<ASTNode> body)
+                 std::unique_ptr<Body> body)
         : identifier(std::move(identifier)), iterable(std::move(iterable)), body(std::move(body)) {
     }
 
