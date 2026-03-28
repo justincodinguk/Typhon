@@ -15,7 +15,7 @@ enum class TypeKind {
 struct Type {
     TypeKind kind;
     std::string className;
-    std::vector<std::unique_ptr<Type>> wrappedTypes;
+    std::vector<std::unique_ptr<Type>>& wrappedTypes;
 
     static Type Int();
     static Type Float();

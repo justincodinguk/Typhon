@@ -5,46 +5,54 @@
 #include "Type.h"
 
 Type Type::Int() {
-    return {TypeKind::INT};
+    std::vector<std::unique_ptr<Type> > wrappedTypes;
+    return {TypeKind::INT, "", wrappedTypes};
 }
 
 Type Type::Float() {
-    return {TypeKind::FLOAT};
+    std::vector<std::unique_ptr<Type> > wrappedTypes;
+    return {TypeKind::FLOAT, "", wrappedTypes};
 }
 
 Type Type::String() {
-    return {TypeKind::STRING};
+    std::vector<std::unique_ptr<Type> > wrappedTypes;
+    return {TypeKind::STRING, "", wrappedTypes};
 }
 
 Type Type::Bool() {
-    return {TypeKind::BOOL};
+    std::vector<std::unique_ptr<Type> > wrappedTypes;
+    return {TypeKind::BOOL, "", wrappedTypes};
 }
 
 Type Type::None() {
-    return {TypeKind::NONE};
+    std::vector<std::unique_ptr<Type> > wrappedTypes;
+    return {TypeKind::NONE, "", wrappedTypes};
 }
 
 Type Type::Class(std::string className, std::vector<std::unique_ptr<Type> > wrappedTypes) {
-    return {TypeKind::CLASS, std::move(className), std::move(wrappedTypes)};
+    return {TypeKind::CLASS, std::move(className), wrappedTypes};
 }
 
 Type Type::Function(std::unique_ptr<Type> returnType, std::vector<std::unique_ptr<Type> > paramTypes) {
     std::vector<std::unique_ptr<Type> > vec;
     vec.push_back(std::move(returnType));
     vec.insert(vec.end(), std::make_move_iterator(paramTypes.begin()), std::make_move_iterator(paramTypes.end()));
-    return {TypeKind::FUNCTION, "", std::move(vec)};
+    return {TypeKind::FUNCTION, "", vec};
 }
 
 Type Type::Any() {
-    return {TypeKind::ANY};
+    std::vector<std::unique_ptr<Type> > wrappedTypes;
+    return {TypeKind::ANY, "", wrappedTypes};
 }
 
 Type Type::Error() {
-    return {TypeKind::ERROR};
+    std::vector<std::unique_ptr<Type> > wrappedTypes;
+    return {TypeKind::ERROR, "", wrappedTypes};
 }
 
 Type Type::Uninitialized() {
-    return {TypeKind::UNINITIALIZED};
+    std::vector<std::unique_ptr<Type> > wrappedTypes;
+    return {TypeKind::UNINITIALIZED, "", wrappedTypes};
 }
 
 bool Type::operator==(const Type &other) const {
