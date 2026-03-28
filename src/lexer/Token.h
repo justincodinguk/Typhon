@@ -3,7 +3,6 @@
 #include <string>
 #include <variant>
 
-#endif //TYPHON_TOKEN_H
 
 enum class TokenType {
     // Symbols
@@ -32,3 +31,5 @@ struct Token {
 
     static Token monostate(TokenType type, int line, int column);
 };
+
+#endif //TYPHON_TOKEN_H
