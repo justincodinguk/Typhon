@@ -12,3 +12,7 @@ std::string Token::toString() {
 Token Token::monostate(TokenType type, int line, int column) {
     return {type, std::monostate(), line, column};
 }
+
+bool Token::operator==(const Token &other) const {
+    return type == other.type && value.index() == other.value.index();
+}

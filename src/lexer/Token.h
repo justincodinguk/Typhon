@@ -30,6 +30,7 @@ struct Token {
     std::string toString();
 
     static Token monostate(TokenType type, int line, int column);
+    bool operator==(const Token &) const;
 };
 
 #endif //TYPHON_TOKEN_H
