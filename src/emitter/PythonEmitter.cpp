@@ -22,7 +22,7 @@ void PythonEmitter::visit(Function *expr) {
     indentLine();
     out += "def " + expr->name + "(";
     for (int i = 0; i < expr->params.size(); ++i) {
-        out += expr->params[i].name;
+        out += expr->params[i]->name;
         if (i != expr->params.size() - 1) out += ",";
         else out += "):\n";
     }
@@ -33,7 +33,7 @@ void PythonEmitter::visit(ExtensionFunction *expr) {
     indentLine();
     out += "def "+expr->name+"(self, ";
     for (int i = 0; i < expr->params.size(); ++i) {
-        out += expr->params[i].name;
+        out += expr->params[i]->name;
         if (i != expr->params.size() - 1) out += ",";
         else out += "):\n";
     }
@@ -148,13 +148,13 @@ void PythonEmitter::visit(Class *expr) {
 
     indentLine();
     out+="def __init__(self,";
-    for (const auto& param : expr->params) out+=param.name+",";
+    for (const auto& param : expr->params) out+=param->name+",";
     out.pop_back();
     out+="):\n";
     indent++;
 
     indentLine();
-    for (const auto& param: expr->params) out+="self."+param.name+"="+param.name+"\n";
+    for (const auto& param: expr->params) out+="self."+param->name+"="+param->name+"\n";
     indent--;
 
     expr->body->accept(this);

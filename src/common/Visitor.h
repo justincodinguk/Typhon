@@ -18,6 +18,7 @@ struct VariableExpression;
 struct CompoundAssignExpression;
 struct CompoundSetExpression;
 struct AssignExpression;
+struct ReturnExpression;
 struct Class;
 struct Function;
 struct TypeNode;
@@ -44,6 +45,7 @@ public:
     virtual void visit(TypeNode* expr) = 0;
     virtual void visit(Class* expr) = 0;
     virtual void visit(Function* expr) = 0;
+    virtual void visit(ReturnExpression* expr) = 0;
     virtual void visit(ExtensionFunction* expr) = 0;
     virtual void visit(Parameter* expr) = 0;
     virtual void visit(Body* expr) = 0;
