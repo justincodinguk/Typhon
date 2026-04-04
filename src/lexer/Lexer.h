@@ -12,7 +12,7 @@ public:
 
     std::vector<Token> tokenize(const std::vector<std::string> &rawTokens);
     std::vector<Token> tokenize(std::string &file);
-    static std::vector<std::string> tokenize_raw(std::string &file);
+    static std::vector<std::string> tokenize_raw(const std::string &file);
 };
 
 #endif //TYPHON_LEXER_H
