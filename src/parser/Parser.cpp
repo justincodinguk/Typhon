@@ -200,6 +200,9 @@ std::unique_ptr<Body> Parser::block() {
             case TokenType::Return:
                 children.push_back(returnStatement());
                 break;
+            case TokenType::Extern:
+                children.push_back(externNode());
+                break;
             case TokenType::Newline:
                 consume();
                 break;
@@ -229,6 +232,15 @@ std::vector<std::unique_ptr<TypeNode> > Parser::genericArgumentsDeclaration() {
         consume(TokenType::RBracket, "Expected ']'");
     }
     return generics;
+}
+
+std::unique_ptr<ASTNode> Parser::externNode() {
+    consume(TokenType::Extern, "Expected extern declaration");
+    consume(TokenType::LBrace, "Expected '{'");
+    auto body = block();
+    consume(TokenType::RBrace, "Expected '}'");
+
+    return std::make_unique<ExternNode>(std::move(body));
 }
 
 std::vector<std::string> Parser::genericParametersDeclaration() {

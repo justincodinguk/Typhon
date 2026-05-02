@@ -6,6 +6,9 @@ std::string Token::toString() {
     if (std::holds_alternative<std::string>(value)) {
         return std::get<std::string>(value);
     }
+    if (std::holds_alternative<double>(value)) {
+        return std::to_string((int)std::get<double>(value));
+    }
     return "";
 }
 

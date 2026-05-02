@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "ASTNode.h"
-#include "../common/Common.h"
+#include "common/Common.h"
 
 class Parser {
     int index = 0;
@@ -39,6 +39,7 @@ public:
     std::unique_ptr<Expression> expression();
     std::unique_ptr<Body> block();
     std::vector<std::unique_ptr<TypeNode>> genericArgumentsDeclaration();
+    std::unique_ptr<ASTNode> externNode();
     std::vector<std::string> genericParametersDeclaration();
     std::unique_ptr<TypeNode> typeDeclaration();
 

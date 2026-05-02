@@ -55,6 +55,7 @@ inline static const std::unordered_map<std::string_view, TokenType> tokenMap = {
     {"class", TokenType::Class},
     {"return", TokenType::Return},
     {"ext", TokenType::Ext},
+    {"extern", TokenType::Extern},
     {"import", TokenType::Import},
     {"as", TokenType::As},
     {"try", TokenType::Try},
